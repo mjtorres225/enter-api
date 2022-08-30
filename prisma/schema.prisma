@@ -1,0 +1,230 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Provincia {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String
+  path String
+  proyectos Proyecto[]
+  empleados Empleado[]
+  maestros Maestro[]
+  accidents EmployeeAccident[]
+  employeeEntry EmployeesEntry []
+  employeeExit EmployeesExit []
+  employeeEntries TemporalEntry[]
+
+}
+
+model Proyecto {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String
+  provinciaId String 
+  address String
+  description String 
+  accidents EmployeeAccident[]
+  users Users[]
+  entradas EmployeesEntry[]
+  entradas2 TemporalEntry[]
+  salidas EmployeesExit[]
+  visitas Visit[]
+  empleadosIds String[] @db.ObjectId
+  maestrosIds String [] @db.ObjectId
+  
+  provincia Provincia @relation(fields: [provinciaId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  empleados Empleado[] @relation(fields: [empleadosIds], references: [id])
+  maestros Maestro[] @relation(fields: [maestrosIds], references: [id])
+}
+model Empleado {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String
+  proyectosIds String[] @db.ObjectId
+  provinciaId String 
+  permits Permits[]
+  calificacion Int?
+  docNumber String? @unique
+  status String
+  laborID String
+  contractDate String
+  accidents EmployeeAccident[]
+  entryID  EmployeesEntry? @relation("EntrieEmployee")
+  entry2ID TemporalEntry? @relation("EntrieEmployee2")
+  exit  EmployeesExit[] @relation("ExitEmployee")
+  maestroId String
+
+  @@fulltext([name])
+  labor Labor @relation(fields: [laborID], references: [id])
+  maestro Maestro @relation(fields: [maestroId], references: [id])
+  provincia Provincia @relation(fields: [provinciaId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  proyectos Proyecto[] @relation(fields: [proyectosIds], references: [id])
+}
+
+model Users {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  docNumber String
+  name String
+  lastName String
+  status Boolean @default(true)
+  email String @unique
+  password String
+  proyectoID String?
+  userCreated Boolean @default(true)
+  roleID String
+  @@fulltext([name])
+  role userRole @relation(fields: [roleID], references: [id])
+  proyecto Proyecto? @relation(fields: [proyectoID], references: [id])
+}
+
+model userRole {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String @unique
+  status Boolean @default(true)
+  description String
+  users Users[]
+}
+
+model Permits {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  idEmployee String
+  description String
+
+  Employee Empleado @relation(fields: [idEmployee], references: [id])
+}
+
+model TemporalEntry{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nombre String
+  employeeID String
+  provinciaID String
+  proyectoID String
+  maestroID String
+  laborID String
+  employee Empleado @relation(fields: [employeeID], references: [id], "EntrieEmployee2")
+  provincia Provincia @relation(fields: [provinciaID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  proyecto Proyecto @relation(fields: [proyectoID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+}
+
+model EmployeesEntry {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nombre String
+  employeeID String
+  provinciaID String
+  proyectoID String
+  maestroID String
+  laborID String
+  employee Empleado @relation(fields: [employeeID], references: [id], "EntrieEmployee")
+  provincia Provincia @relation(fields: [provinciaID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  proyecto Proyecto @relation(fields: [proyectoID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+}
+model EmployeesExit {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nombre String
+  proyectoID String
+  employeeID String
+  provinciaID String
+  maestroID String
+  employee Empleado @relation(fields: [employeeID], references: [id], "ExitEmployee")
+  provincia Provincia @relation(fields: [provinciaID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  proyecto Proyecto @relation(fields: [proyectoID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+}
+
+model EmployeeAccident {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  employeeID String
+  provinceID String
+  projectID String
+  description String
+  adminReviewed Boolean
+  status Boolean
+  @@fulltext([employeeID])
+  employee Empleado @relation(fields: [employeeID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  province Provincia @relation(fields: [provinceID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  project Proyecto @relation(fields: [projectID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+}
+
+type Image {
+  name String
+  uri String
+  type String
+}
+
+model Labor {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  type String 
+  description String
+  maestros Maestro[]
+  empleados Empleado[]
+  status Boolean @default(true)
+}
+
+model Maestro {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String
+  docNumber String
+  laborID String
+  provinciaID String
+  proyectosIds String[] @db.ObjectId
+  status Boolean @default(true)
+  empleados Empleado[]
+
+  provincia Provincia @relation(fields: [provinciaID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  proyectos Proyecto[] @relation(fields: [proyectosIds], references: [id])
+  labor Labor @relation(fields: [laborID], references: [id])
+}
+model Visit {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectID String
+  docNumber String
+  name String
+  company String
+  email String
+  position String
+  start DateTime
+  final DateTime
+  status String @default("Pendiente")
+
+  proyecto Proyecto @relation(fields: [projectID], references: [id])
+}
+
+
