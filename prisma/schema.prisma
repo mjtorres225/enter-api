@@ -21,8 +21,8 @@ model Provincia {
   empleados Empleado[]
   maestros Maestro[]
   accidents EmployeeAccident[]
-  employeeEntry EmployeesEntry []
-  employeeExit EmployeesExit []
+  employeeEntry EmployeesEntry[]
+  employeeExit EmployeesExit[]
   employeeEntries TemporalEntry[]
 
 }
@@ -68,9 +68,9 @@ model Empleado {
   maestroId String
 
   @@fulltext([name])
-  labor Labor @relation(fields: [laborID], references: [id])
-  maestro Maestro @relation(fields: [maestroId], references: [id])
-  provincia Provincia @relation(fields: [provinciaId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  labor Labor? @relation(fields: [laborID], references: [id])
+  maestro Maestro? @relation(fields: [maestroId], references: [id])
+  provincia Provincia? @relation(fields: [provinciaId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   proyectos Proyecto[] @relation(fields: [proyectosIds], references: [id])
 }
 
@@ -109,7 +109,7 @@ model Permits {
   idEmployee String
   description String
 
-  Employee Empleado @relation(fields: [idEmployee], references: [id])
+  Employee Empleado? @relation(fields: [idEmployee], references: [id])
 }
 
 model TemporalEntry{
@@ -118,12 +118,12 @@ model TemporalEntry{
   updatedAt DateTime @updatedAt
 
   nombre String
-  employeeID String
+  employeeID String @unique
   provinciaID String
   proyectoID String
   maestroID String
   laborID String
-  employee Empleado @relation(fields: [employeeID], references: [id], "EntrieEmployee2")
+  employee Empleado? @relation(fields: [employeeID], references: [id], "EntrieEmployee2")
   provincia Provincia @relation(fields: [provinciaID], references: [id], onUpdate: Cascade, onDelete: Cascade)
   proyecto Proyecto @relation(fields: [proyectoID], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
@@ -135,14 +135,14 @@ model EmployeesEntry {
   updatedAt DateTime @updatedAt
 
   nombre String
-  employeeID String
+  employeeID String @unique
   provinciaID String
   proyectoID String
   maestroID String
   laborID String
-  employee Empleado @relation(fields: [employeeID], references: [id], "EntrieEmployee")
-  provincia Provincia @relation(fields: [provinciaID], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  proyecto Proyecto @relation(fields: [proyectoID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  employee Empleado? @relation(fields: [employeeID], references: [id], "EntrieEmployee")
+  provincia Provincia? @relation(fields: [provinciaID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  proyecto Proyecto? @relation(fields: [proyectoID], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
 }
 model EmployeesExit {
@@ -155,7 +155,7 @@ model EmployeesExit {
   employeeID String
   provinciaID String
   maestroID String
-  employee Empleado @relation(fields: [employeeID], references: [id], "ExitEmployee")
+  employee Empleado? @relation(fields: [employeeID], references: [id], "ExitEmployee")
   provincia Provincia @relation(fields: [provinciaID], references: [id], onUpdate: Cascade, onDelete: Cascade)
   proyecto Proyecto @relation(fields: [proyectoID], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }
@@ -171,7 +171,7 @@ model EmployeeAccident {
   adminReviewed Boolean
   status Boolean
   @@fulltext([employeeID])
-  employee Empleado @relation(fields: [employeeID], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  employee Empleado? @relation(fields: [employeeID], references: [id], onUpdate: Cascade, onDelete: Cascade)
   province Provincia @relation(fields: [provinceID], references: [id], onUpdate: Cascade, onDelete: Cascade)
   project Proyecto @relation(fields: [projectID], references: [id], onUpdate: Cascade, onDelete: Cascade)
 }

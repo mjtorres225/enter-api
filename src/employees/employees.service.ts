@@ -390,8 +390,9 @@ export class employeesService {
          },
          proyecto: true,
        },
-       orderBy: {
-         createdAt: 'desc',
+      
+      orderBy: {
+        createdAt: 'asc',
       },
     });
     return entries;
